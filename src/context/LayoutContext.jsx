@@ -1,17 +1,28 @@
-// src/context/LayoutContext.js
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const LayoutContext = createContext();
 
 export const LayoutProvider = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  // gabungan sistem kamu + sistem template
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // open state utama (desktop)
   const [isHovered, setIsHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isMobileOpen, setIsMobileOpen] = useState(false); // khusus mobile toggle
 
-  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+  // sama kayak "isExpanded" di template
+  const isExpanded = isSidebarOpen;
 
+  const toggleSidebar = () => {
+    if (isMobile) {
+      setIsMobileOpen((prev) => !prev);
+    } else {
+      setIsSidebarOpen((prev) => !prev);
+    }
+  };
+
+  // deteksi window resize buat ubah mode mobile
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -19,9 +30,12 @@ export const LayoutProvider = ({ children }) => {
   return (
     <LayoutContext.Provider
       value={{
-        isSidebarOpen,
+        isExpanded,       // alias untuk sidebar desktop
+        isSidebarOpen,    // state desktop
         toggleSidebar,
         isMobile,
+        isMobileOpen,
+        setIsMobileOpen,
         isHovered,
         setIsHovered,
       }}

@@ -1,16 +1,16 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { useTheme } from "../context/ThemeContext";
-import { useLayout } from "../context/LayoutContext"; // ⬅️ Tambah ini
+import { useLayout } from "../context/LayoutContext";
 
 export default function DashboardLayout({ children }) {
   const { isDark } = useTheme();
-  const { isSidebarOpen } = useLayout(); // ⬅️ Ambil state dari context
+  const { isExpanded, isMobile, isMobileOpen } = useLayout();
 
   return (
     <div className={`flex h-screen ${isDark ? "dark" : ""}`}>
-      {/* Sidebar muncul kalau open */}
-      {isSidebarOpen && <Sidebar />}
+      {/* Sidebar tetap muncul di desktop atau saat mobile open */}
+      {(isExpanded || isMobileOpen) && <Sidebar />}
 
       <div className="flex-1 flex flex-col">
         <Navbar />

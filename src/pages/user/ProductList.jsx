@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { createTransaksi } from "../../api/mockapi";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { toast } from "../../utils/toast";
+import Pagination from "../../components/Pagination";
 
 export default function ProductList() {
   const { isDark } = useTheme();
@@ -11,8 +12,10 @@ export default function ProductList() {
   const [cart, setCart] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 6;
   const user = JSON.parse(localStorage.getItem("user"));
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { search } = useLocation();
 
   // Ambil query search dari Navbar
@@ -38,6 +41,17 @@ export default function ProductList() {
   // Filter produk sesuai searchQuery
   const filteredProduk = produk.filter((p) =>
     p.nama.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProduk.length / itemsPerPage);
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages || 1);
+  }, [totalPages, page]);
+
+  const paginatedProduk = filteredProduk.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
   );
 
   const addToCart = (item) => {
@@ -75,7 +89,7 @@ export default function ProductList() {
 
       toast(`Pesanan ${selectedProduct.nama} berhasil disewa!`);
       setShowPopup(false);
-    } catch (err) {
+    } catch {
       toast("Terjadi kesalahan saat membuat pesanan.", "error");
     }
   };
@@ -102,8 +116,8 @@ export default function ProductList() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {filteredProduk.length > 0 ? (
-          filteredProduk.map((p) => (
+        {paginatedProduk.length > 0 ? (
+          paginatedProduk.map((p) => (
             <div
               key={p.id}
               className={`rounded-xl shadow-lg p-4 flex flex-col justify-between transform hover:scale-105 transition duration-300 ${
@@ -115,7 +129,7 @@ export default function ProductList() {
               <img
                 src={p.gambar}
                 alt={p.nama}
-                className="h-52 w-full object-cover rounded-lg mb-3"
+                className="h-60 w-full object-cover rounded-lg mb-3"
               />
               <h2 className="font-bold text-lg mb-1">{p.nama}</h2>
               <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
@@ -144,7 +158,15 @@ export default function ProductList() {
         ) : (
           <p className="text-center col-span-full">Produk tidak ditemukan.</p>
         )}
-      </div>
+  </div>
+      <Pagination
+        page={page}
+        setPage={(p) => {
+          setPage(p);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        total={totalPages}
+      />
 
       {/* Popup */}
       {showPopup && selectedProduct && (
