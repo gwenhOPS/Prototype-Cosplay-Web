@@ -13,6 +13,8 @@ import ProdukAdmin from './pages/admin/ProdukAdmin.jsx'
 import PelangganAdmin from './pages/admin/PelangganAdmin.jsx'
 import TransaksiAdmin from './pages/admin/TransaksiAdmin.jsx'
 import { useAuth } from './context/AuthContext.jsx'
+import Footer from './components/Footer.jsx'
+import { AnimatePresence } from 'framer-motion'
 
 export default function App(){
   const { user } = useAuth()
@@ -21,6 +23,7 @@ export default function App(){
   }
 
   return (
+    <AnimatePresence mode="wait">
     <DashboardLayout>
       <Routes>
         {user.role === 'admin' ? (
@@ -42,6 +45,8 @@ export default function App(){
           </>
         )}
       </Routes>
+      <Footer />
     </DashboardLayout>
+    </AnimatePresence>
   )
 }

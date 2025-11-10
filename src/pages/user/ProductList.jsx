@@ -129,7 +129,7 @@ export default function ProductList() {
               <img
                 src={p.gambar}
                 alt={p.nama}
-                className="h-60 w-full object-cover rounded-lg mb-3"
+                className="h-full w-full object-cover rounded-lg mb-3"
               />
               <h2 className="font-bold text-lg mb-1">{p.nama}</h2>
               <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">

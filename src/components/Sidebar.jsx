@@ -132,18 +132,6 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* 🔸 Footer */}
-        {(isSidebarOpen || isHovered) && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="absolute bottom-4 left-0 w-full text-left text-xs opacity-80"
-          >
-            <p className="font-light">© {new Date().getFullYear()} CosRent</p>
-            <p className="italic text-pink-200">“Transform into your favorite character”</p>
-          </motion.div>
-        )}
       </motion.aside>
     </>
   );

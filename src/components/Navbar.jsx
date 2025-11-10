@@ -1,18 +1,17 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { Search, X, Moon, Sun } from "lucide-react";
+import { Search, X, Moon, Sun, Menu, ArrowLeft } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
-import { useLayout } from "../context/LayoutContext"; // Context layout
+import { useLayout } from "../context/LayoutContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark, toggleTheme } = useTheme();
-  const { toggleSidebar, isMobile } = useLayout(); // Ambil dari context
+  const { toggleSidebar, isMobile, isMobileOpen, setIsMobileOpen } = useLayout();
 
-  const [isOpenMobile, setIsOpenMobile] = useState(false);
   const [showSearchMobile, setShowSearchMobile] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -27,7 +26,7 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     navigate("/login");
-    setIsOpenMobile(false);
+    setIsMobileOpen(false);
   };
 
   const handleSearch = (e) => {
@@ -36,7 +35,7 @@ export default function Navbar() {
       navigate(`/produk?search=${encodeURIComponent(query)}`);
       setQuery("");
       setShowSearchMobile(false);
-      setIsOpenMobile(false);
+      setIsMobileOpen(false);
     }
   };
 
@@ -49,32 +48,40 @@ export default function Navbar() {
       }`}
     >
       <div className="flex items-center justify-between px-6 py-4">
-        {/* 🔹 Logo (bisa toggle sidebar di desktop, buka menu di mobile) */}
+        {/* 🔹 Hamburger / Arrow */}
         <button
           onClick={() => {
-            if (isMobile) return setIsOpenMobile((prev) => !prev);
-            toggleSidebar();
+            if (isMobile) {
+              setIsMobileOpen((prev) => !prev);
+            } else {
+              toggleSidebar();
+            }
           }}
-          className="flex items-center gap-3 group focus:outline-none"
+          className="flex items-center gap-3 focus:outline-none"
         >
           <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg border-2 transition-all
-            bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 text-white font-bold group-hover:scale-110`}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl border-2 shadow-md transition-all
+            ${isDark
+              ? "border-gray-700 bg-gray-800/70 text-white"
+              : "border-pink-300 bg-white/70 text-gray-800"} 
+            hover:scale-110`}
           >
-            ✦
+            {isMobileOpen ? (
+              <ArrowLeft
+                size={24}
+                className="text-pink-500 transition-transform duration-300"
+              />
+            ) : (
+              <Menu
+                size={24}
+                className="text-pink-500 transition-transform duration-300"
+              />
+            )}
           </div>
-          <span
-            className={`text-xs tracking-wider font-semibold italic ${
-              isDark ? "text-gray-300" : "text-gray-600"
-            } group-hover:text-pink-500 transition`}
-          >
-            CosRent Portal
-          </span>
         </button>
 
         {/* 🔹 Desktop Section */}
         <div className="hidden md:flex items-center gap-4">
-          {/* Search bar */}
           <form onSubmit={handleSearch} className="relative">
             <input
               type="text"
@@ -134,7 +141,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* 🔹 Mobile Control */}
+        {/* 🔹 Mobile Search Icon */}
         <div className="md:hidden flex items-center gap-3">
           <button
             onClick={() => setShowSearchMobile(!showSearchMobile)}
@@ -175,68 +182,76 @@ export default function Navbar() {
       )}
 
       {/* 🔹 Mobile Sidebar */}
-      {isOpenMobile && isMobile && (
-        <aside
-          className={`fixed top-0 left-0 h-full w-2/3 p-6 gap-4 z-50 transition-transform duration-500 backdrop-blur-md ${
-            isDark
-              ? "bg-gray-900/80 text-white border-r border-gray-700"
-              : "bg-white/80 text-gray-900 border-r border-pink-200"
-          }`}
-        >
-          <button
-            onClick={() => setIsOpenMobile(false)}
-            className="self-end text-gray-500 hover:text-red-500 transition"
-          >
-            <X size={28} />
-          </button>
+      {isMobile && isMobileOpen && (
+        <>
+          {/* Overlay blur untuk halaman di belakang */}
+          <div
+            className="fixed inset-0 z-40 backdrop-blur-[2px] bg-black/20 transition-opacity duration-500"
+            onClick={() => setIsMobileOpen(false)} // Klik luar buat nutup
+          ></div>
 
-          <button
-            onClick={toggleTheme}
-            className="w-full px-4 py-2 rounded-full bg-pink-500/80 hover:bg-pink-600 text-white flex items-center justify-center gap-2 shadow-md transition"
+          <aside
+            className={`fixed top-0 left-0 h-full w-2/3 p-6 gap-4 z-50 transition-transform duration-500 backdrop-blur-md ${
+              isDark
+                ? "bg-gray-900/80 text-white border-r border-gray-700"
+                : "bg-white/80 text-gray-900 border-r border-pink-200"
+            }`}
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            {isDark ? "Light Mode" : "Dark Mode"}
-          </button>
+            <button
+              onClick={() => setIsMobileOpen(false)}
+              className="self-end text-gray-500 hover:text-red-500 transition"
+            >
+              <X size={28} />
+            </button>
 
-          <nav className="flex flex-col gap-3 mt-4">
-            {userMenu.map((m) => {
-              const isActive = location.pathname === m.path;
-              return (
-                <Link
-                  key={m.path}
-                  to={m.path}
-                  onClick={() => setIsOpenMobile(false)}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
-                    isActive
-                      ? "bg-pink-600/80 text-white shadow-md scale-[1.02]"
-                      : "hover:bg-pink-500/70 hover:translate-x-1"
-                  }`}
+            <button
+              onClick={toggleTheme}
+              className="w-full px-4 py-2 rounded-full bg-pink-500/80 hover:bg-pink-600 text-white flex items-center justify-center gap-2 shadow-md transition"
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              {isDark ? "Light Mode" : "Dark Mode"}
+            </button>
+
+            <nav className="flex flex-col gap-3 mt-4">
+              {userMenu.map((m) => {
+                const isActive = location.pathname === m.path;
+                return (
+                  <Link
+                    key={m.path}
+                    to={m.path}
+                    onClick={() => setIsMobileOpen(false)}
+                    className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
+                      isActive
+                        ? "bg-pink-600/80 text-white shadow-md scale-[1.02]"
+                        : "hover:bg-pink-500/70 hover:translate-x-1"
+                    }`}
+                  >
+                    {m.label}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="mt-auto">
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 mt-4 rounded-full bg-red-500/80 hover:bg-red-600 text-white shadow-md transition"
                 >
-                  {m.label}
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setIsMobileOpen(false)}
+                  className="w-full px-4 py-2 mt-4 rounded-full bg-green-500/80 hover:bg-green-600 text-white shadow-md text-center transition"
+                >
+                  Login
                 </Link>
-              );
-            })}
-          </nav>
-
-          <div className="mt-auto">
-            {user ? (
-              <button
-                onClick={handleLogout}
-                className="w-full px-4 py-2 mt-4 rounded-full bg-red-500/80 hover:bg-red-600 text-white shadow-md transition"
-              >
-                Logout
-              </button>
-            ) : (
-              <Link
-                to="/login"
-                onClick={() => setIsOpenMobile(false)}
-                className="w-full px-4 py-2 mt-4 rounded-full bg-green-500/80 hover:bg-green-600 text-white shadow-md text-center transition"
-              >
-                Login
-              </Link>
-            )}
-          </div>
-        </aside>
+              )}
+            </div>
+          </aside>
+        </>
       )}
     </header>
   );
