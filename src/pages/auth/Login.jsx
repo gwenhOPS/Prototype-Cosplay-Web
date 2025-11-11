@@ -5,6 +5,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaPhoneAlt } from "react-icons/fa";
 import AuthLayout from "../../layouts/AuthLayout";
+import { loginUser } from "../../api/api-cosplay";
 
 
 export default function Login() {
@@ -15,13 +16,17 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const res = login(form.email, form.password);
-
-    if (res.success) navigate("/");
-    else setError(res.message);
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await loginUser(form);
+    console.log("Login success:", res);
+    localStorage.setItem("token", res.token); // kalau API-nya balikin token
+    navigate("/");
+  } catch (err) {
+    setError(err.message || "Email atau password salah");
+  }
+};
 
   return (
     <AuthLayout

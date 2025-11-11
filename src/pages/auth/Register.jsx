@@ -5,6 +5,8 @@ import { useTheme } from "../../context/ThemeContext";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaPhoneAlt } from "react-icons/fa";
 import AuthLayout from "../../layouts/AuthLayout";
+import { registerUser } from "../../api/api-cosplay";
+
 
 export default function Register() {
   const { register } = useAuth();
@@ -19,12 +21,16 @@ export default function Register() {
   });
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const res = register(form);
-    if (res.success) navigate("/");
-    else setError(res.message);
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await registerUser(form);
+    console.log("Register success:", res);
+    navigate("/login");
+  } catch (err) {
+    setError(err.message || "Gagal mendaftar");
+  }
+};
 
   return (
     <AuthLayout
